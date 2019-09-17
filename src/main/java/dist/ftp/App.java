@@ -55,9 +55,9 @@ public class App extends Configured implements Tool{
         jobConf.set("ftp-password", ftpPassword);
         jobConf.set("ftp-host",ftpHost);
 
-        jobConf.set("yarn.app.mapreduce.am.resource.mb","512");
-        jobConf.set("mapreduce.map.memory.mb","256");
-        jobConf.set("mapred.child.java.opts","-Xmx128m");
+        // jobConf.set("yarn.app.mapreduce.am.resource.mb","512");
+        // jobConf.set("mapreduce.map.memory.mb","256");
+        // jobConf.set("mapred.child.java.opts","-Xmx150m");
         
 
         if(args[0].toLowerCase().equals(toHdfs)){
