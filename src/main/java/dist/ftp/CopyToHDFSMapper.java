@@ -11,11 +11,12 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 public class CopyToHDFSMapper extends Mapper<Object,Text,Text,BytesWritable>{
     private FtpUtil ftp;
+    private FTPClient ftpClient;
 
     @Override
     protected void setup(Mapper<Object, Text, Text, BytesWritable>.Context context)
             throws IOException, InterruptedException {
-            FTPClient ftpClient = new FTPClient();
+            ftpClient = new FTPClient();
             Configuration conf = context.getConfiguration();
             ftpClient.connect(conf.get("ftp-host"));
             ftpClient.login(conf.get("ftp-user-name"), conf.get("ftp-password"));
@@ -29,5 +30,12 @@ public class CopyToHDFSMapper extends Mapper<Object,Text,Text,BytesWritable>{
             throws IOException, InterruptedException {
             BytesWritable file = new BytesWritable(ftp.downloadFile(value.toString()));
             context.write(value, file);
+    }
+
+    @Override
+    protected void cleanup(Mapper<Object, Text, Text, BytesWritable>.Context context)
+                    throws IOException, InterruptedException {
+            super.cleanup(context);
+            ftpClient.disconnect();
     }
 }

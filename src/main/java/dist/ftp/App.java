@@ -119,7 +119,9 @@ public class App extends Configured implements Tool{
         ftpClient.enterLocalPassiveMode();
         ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
         
-        return String.join("\n", ftp.listAllSubDirectoriesRecursively(directory));
+        String res = String.join("\n", ftp.listAllSubDirectoriesRecursively(directory));
+        ftpClient.disconnect();
+        return res;
     }
 
     public static void cleanup(){

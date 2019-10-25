@@ -23,12 +23,13 @@ class CopyFromHDFSMapper extends Mapper<Object,Text,NullWritable,NullWritable>{
     private FileSystem hdfs;
     private String baseFolder;
     private String inputFolder;
+    private FTPClient ftpClient;
 
     @Override
     protected void setup(Mapper<Object, Text, NullWritable, NullWritable>.Context context)
         throws IOException, InterruptedException {
 
-        FTPClient ftpClient = new FTPClient();
+        ftpClient = new FTPClient();
         Configuration conf = context.getConfiguration();
 
         inputFolder = conf.get("input-folder");
@@ -54,5 +55,12 @@ class CopyFromHDFSMapper extends Mapper<Object,Text,NullWritable,NullWritable>{
         FSDataInputStream input = hdfs.open(new Path(value.toString()));
         ftp.uploadFile(ftpFileLocation, IOUtils.toByteArray(input));
 
+    }
+
+    @Override
+    protected void cleanup(Mapper<Object, Text, NullWritable, NullWritable>.Context context)
+            throws IOException, InterruptedException {
+        super.cleanup(context);
+        ftpClient.disconnect();
     }
 }
