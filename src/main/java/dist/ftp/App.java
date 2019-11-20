@@ -44,6 +44,39 @@ public class App extends Configured implements Tool{
    
     @Override
     public int run(String[] args) throws Exception {
+
+        try {
+            //read configuration file
+            configFile.load(new FileInputStream("config.properties"));
+            ftpHost = configFile.getProperty("ftpHost");
+            ftpUsername = configFile.getProperty("ftpUsername");
+            ftpPassword = configFile.getProperty("ftpPassword");
+
+            if(ftpHost == null || ftpUsername == null || ftpPassword == null){
+                System.out.println("Invalid ftp configuration");
+                System.exit(1);
+            }
+
+
+            Configuration conf = new Configuration();
+            FileSystem fs = FileSystem.get(new URI(fileSystem), conf);
+            String listing = null;
+
+            if(args[0].toLowerCase().equals(fromHdfs)){
+                listing = getHdfsListing(fs,args[1]);
+            } else if (args[0].toLowerCase().equals(toHdfs)){
+                listing = getFtpListing(args[1]);
+            }
+             
+            FSDataOutputStream fsOut = fs.create(splitFile);
+            fsOut.writeBytes(listing);
+            fsOut.close();
+
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+
         Configuration conf = getConf();
         Job job = Job.getInstance(conf);
         job.setJarByClass(App.class);
@@ -136,39 +169,9 @@ public class App extends Configured implements Tool{
     }
 
     public static void main(String[] args) {
-        
-        try {
-            //read configuration file
-            configFile.load(new FileInputStream("config.properties"));
-            ftpHost = configFile.getProperty("ftpHost");
-            ftpUsername = configFile.getProperty("ftpUsername");
-            ftpPassword = configFile.getProperty("ftpPassword");
 
-            if(ftpHost == null || ftpUsername == null || ftpPassword == null){
-                System.out.println("Invalid ftp configuration");
-                System.exit(1);
-            }
-
-
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(new URI(fileSystem), conf);
-            String listing = null;
-
-            if(args[0].toLowerCase().equals(fromHdfs)){
-                listing = getHdfsListing(fs,args[1]);
-            } else if (args[0].toLowerCase().equals(toHdfs)){
-                listing = getFtpListing(args[1]);
-            }
-             
-            FSDataOutputStream fsOut = fs.create(splitFile);
-            fsOut.writeBytes(listing);
-            fsOut.close();
-
+        try{
             ToolRunner.run(new App(), args);
-
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-
         } catch(Exception e){
             e.printStackTrace();
 
